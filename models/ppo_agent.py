@@ -7,12 +7,16 @@ from models.networks import ActorCriticNetwork
 class PPOAgent(torch.nn.Module):
     def __init__(self, input_dim, action_dim, config):
         super(PPOAgent, self).__init__()
-        self.network = ActorCriticNetwork(input_dim, action_dim)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.network = ActorCriticNetwork(input_dim, action_dim).to(self.device)
         self.config = config
-        self.action_std = torch.ones(action_dim) * 0.5  # Initial standard deviation for exploration
+        self.action_std = torch.ones(action_dim, device=self.device) * 0.5  # Initial standard deviation for exploration
         self.action_var = self.action_std.pow(2)
 
     def forward(self, x):
+        x = x.to(self.device)
+        if x.dim() == 1:
+            x = x.unsqueeze(0)  # Add batch dimension if it's missing
         action_mean, state_value = self.network(x)
         action_std = self.action_std.expand_as(action_mean)
         dist = Normal(action_mean, action_std)

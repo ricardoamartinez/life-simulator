@@ -38,9 +38,10 @@ class BaseAgent:
 
     def act(self, action):
         """Update agent's state based on the chosen action."""
-        # Assuming action is a 3D vector with values between -1 and 1
+        # Ensure action is a numpy array with shape (3,)
+        action = np.array(action).flatten()
         self.velocity = action * self.speed
-        self.position += self.velocity * self.config['simulation']['time_step']
+        self.position = self.position + self.velocity * self.config['simulation']['time_step']
 
         # Ensure the agent stays within the container
         self.position = np.clip(self.position, 0, self.config['simulation']['container_size'])

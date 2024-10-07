@@ -1,5 +1,6 @@
 # agents/prey.py
 
+import numpy as np
 import torch
 from agents.base_agent import BaseAgent
 from models.ppo_agent import PPOAgent
@@ -17,20 +18,18 @@ class Prey(BaseAgent):
         self.model.train()
 
     def get_input_dim(self):
-        # Define input dimensions based on observations
-        # Example: distances and directions to nearest predators and food
+        # Adjust this based on the actual observation space
         num_predators = self.config['simulation']['num_agents']['predators']
-        num_food = 10  # Assume max 10 food items in vision
-        return (num_predators + num_food) * 3  # For each: x, y, z distance
+        num_food = self.config['simulation']['num_agents']['prey'] * 2  # Assuming max food is twice the number of prey
+        return (num_predators + num_food) * 3  # For each entity: x, y, z distance
 
     def perceive(self, environment):
-        # Detect predators and food within vision range
         observations = []
         # Predators
         for predator in environment.get_predators():
             dist = distance(self.position, predator.position)
             if dist <= self.vision_range:
-                direction = (predator.position - self.position) / dist if dist > 0 else np.zeros(3)
+                direction = (np.array(predator.position) - np.array(self.position)) / dist
                 observations.extend(direction * (self.vision_range - dist) / self.vision_range)
             else:
                 observations.extend([0.0, 0.0, 0.0])
@@ -42,15 +41,17 @@ class Prey(BaseAgent):
                 continue
             dist = distance(self.position, food.position)
             if dist <= self.vision_range:
-                direction = (food.position - self.position) / dist if dist > 0 else np.zeros(3)
+                direction = (np.array(food.position) - np.array(self.position)) / dist
                 observations.extend(direction * (self.vision_range - dist) / self.vision_range)
             else:
                 observations.extend([0.0, 0.0, 0.0])
 
-        # Pad the observation to match input_dim
+        # Pad or truncate the observation to match input_dim
         expected_length = self.get_input_dim()
         if len(observations) < expected_length:
             observations += [0.0] * (expected_length - len(observations))
+        elif len(observations) > expected_length:
+            observations = observations[:expected_length]
 
         return torch.tensor(observations, dtype=torch.float32).to(self.device)
 

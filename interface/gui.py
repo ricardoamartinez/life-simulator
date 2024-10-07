@@ -8,10 +8,15 @@ class SimulationGUI:
     def __init__(self, config, on_start_callback):
         self.logger = get_logger(self.__class__.__name__)
         self.root = tk.Tk()
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.title("Reinforcement Learning Simulation Setup")
         self.config = config
         self.on_start_callback = on_start_callback
         self.create_widgets()
+
+    def on_closing(self):
+        self.root.quit()
+        self.root.destroy()
 
     def create_widgets(self):
         # Number of Predators
@@ -43,7 +48,12 @@ class SimulationGUI:
         ttk.Button(self.root, text="Start Simulation", command=self.start_simulation).grid(column=0, row=5, columnspan=2, pady=10)
 
     def start_simulation(self):
-        # Update config with new parameters
+        self.update_config_from_inputs()
+        self.logger.info("Configuration updated from GUI inputs.")
+        self.root.quit()
+        self.on_start_callback()
+
+    def update_config_from_inputs(self):
         try:
             self.config['simulation']['num_agents']['predators'] = self.num_predators.get()
             self.config['simulation']['num_agents']['prey'] = self.num_prey.get()
@@ -53,13 +63,9 @@ class SimulationGUI:
             if len(container_dims) != 3:
                 raise ValueError("Container size must have three dimensions separated by commas.")
             self.config['simulation']['container_size'] = container_dims
-            self.logger.info("Configuration updated from GUI inputs.")
         except Exception as e:
             self.logger.error(f"Error in configuration inputs: {e}")
             return
-
-        self.on_start_callback()
-        self.root.destroy()
 
     def run(self):
         self.root.mainloop()

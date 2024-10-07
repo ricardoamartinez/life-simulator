@@ -1,11 +1,13 @@
 # environment/world.py
 
+import traceback
 from environment.container import Container
 from environment.food import Food
 from agents.predator import Predator
 from agents.prey import Prey
 from utils.logger import get_logger
 import random
+from utils.helpers import distance  # Make sure this import is present
 
 class World:
     def __init__(self, config):
@@ -57,22 +59,33 @@ class World:
         return [food for food in self.food_items if not food.consumed]
 
     def update(self):
-        # Update all agents
-        for agent in list(self.agents):  # Use list to avoid modification during iteration
-            if agent.alive:
-                agent.update(self)
-            else:
-                self.agents.remove(agent)
-                self.logger.info(f"{agent.__class__.__name__} removed from the world.")
+        self.logger.debug("Starting world update")
+        try:
+            # Update all agents
+            for agent in list(self.agents):  # Use list to avoid modification during iteration
+                if agent.alive:
+                    try:
+                        agent.update(self)
+                    except Exception as e:
+                        self.logger.error(f"Error updating {agent.__class__.__name__}: {e}")
+                        self.logger.error(traceback.format_exc())
+                else:
+                    self.agents.remove(agent)
+                    self.logger.info(f"{agent.__class__.__name__} removed from the world.")
 
-        # Handle interactions (e.g., eating)
-        self.handle_eating()
+            # Handle interactions (e.g., eating)
+            self.handle_eating()
 
-        # Spawn food periodically
-        self.spawn_food()
+            # Spawn food periodically
+            self.spawn_food()
 
-        # Handle reproduction
-        self.handle_reproduction()
+            # Handle reproduction
+            self.handle_reproduction()
+        except Exception as e:
+            self.logger.error(f"Error in world update: {e}")
+            self.logger.error(traceback.format_exc())
+            raise
+        self.logger.debug("World update completed")
 
     def handle_eating(self):
         # Predators eat prey

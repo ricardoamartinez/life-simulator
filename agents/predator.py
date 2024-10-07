@@ -1,5 +1,6 @@
 # agents/predator.py
 
+import numpy as np
 import torch
 from agents.base_agent import BaseAgent
 from models.ppo_agent import PPOAgent
@@ -47,7 +48,7 @@ class Predator(BaseAgent):
             dist, _ = self.model(observations)
             action = dist.sample()
             action = torch.clamp(action, -1, 1)  # Ensure actions are within bounds
-        return action.cpu().numpy()
+        return action.cpu().numpy().flatten()  # Ensure it's a 1D numpy array
 
     def update_model(self, rewards, log_probs, values, dones):
         # Convert lists to tensors
