@@ -13,14 +13,19 @@ import time
 import signal
 import traceback
 import sys
+import torch
+
+# Add this near the top of the file, after the imports
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
 
 def run_simulation(config):
     logger = get_logger("Main")
     logger.info("Starting simulation")
-    world = World(config=config)
+    world = World(config=config, device=device)
     visualizer = None
     if config['visualization']['enable']:
-        visualizer = Visualizer(config, world)
+        visualizer = Visualizer(config, world, device)
 
     # Start visualization in the main thread
     if visualizer:

@@ -7,7 +7,7 @@ from utils.helpers import distance
 from utils.logger import get_logger
 
 class BaseAgent:
-    def __init__(self, dna=None, position=None, energy=100.0, config=None):
+    def __init__(self, dna=None, position=None, energy=100.0, config=None, device=None):
         self.logger = get_logger(self.__class__.__name__)
         self.dna = dna or DNA()
         self.position = np.array(position) if position is not None else np.random.uniform(0, config['simulation']['container_size'], size=3)
@@ -15,6 +15,7 @@ class BaseAgent:
         self.energy = energy
         self.alive = True
         self.config = config
+        self.device = device
 
         # Traits influenced by DNA
         self.speed = self.dna.traits['speed']
@@ -22,7 +23,6 @@ class BaseAgent:
         self.vision_range = self.dna.traits['vision_range']
 
         # PPO Model
-        self.device = torch.device('cuda' if torch.cuda.is_available() and config['hardware']['use_cuda'] else 'cpu')
         self.model = None  # To be defined in subclasses
         self.optimizer = None
 

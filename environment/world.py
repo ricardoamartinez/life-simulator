@@ -10,9 +10,10 @@ import random
 from utils.helpers import distance  # Make sure this import is present
 
 class World:
-    def __init__(self, config):
+    def __init__(self, config, device):
         self.logger = get_logger(__name__)
         self.config = config
+        self.device = device
         self.container = Container(config['simulation']['container_size'])
         self.agents = []
         self.food_items = []
@@ -29,11 +30,11 @@ class World:
         num_prey = self.config['simulation']['num_agents']['prey']
 
         for _ in range(num_predators):
-            predator = Predator(config=self.config)
+            predator = Predator(config=self.config, device=self.device)
             self.agents.append(predator)
 
         for _ in range(num_prey):
-            prey = Prey(config=self.config)
+            prey = Prey(config=self.config, device=self.device)
             self.agents.append(prey)
 
     def spawn_food(self, initial=False):

@@ -6,13 +6,15 @@ from vispy import scene  # Add this import
 import numpy as np
 from utils.logger import get_logger
 import vispy.app as app
+import torch  # Add this import
 
 class Visualizer:
-    def __init__(self, config, world):
+    def __init__(self, config, world, device):
         self.logger = get_logger(__name__)
         self.world = world
         self.container_size = np.array(config['simulation']['container_size'])
         self.display_rate = config['visualization']['display_rate']
+        self.device = device
         
         self.canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
         self.view = self.canvas.central_widget.add_view()
@@ -65,26 +67,26 @@ class Visualizer:
         foods = []
 
         for agent in self.world.get_predators():
-            predators.append(agent.position - self.container_size / 2)
+            predators.append(agent.position.cpu().numpy() if isinstance(agent.position, torch.Tensor) else agent.position)
 
         for agent in self.world.get_prey():
-            prey.append(agent.position - self.container_size / 2)
+            prey.append(agent.position.cpu().numpy() if isinstance(agent.position, torch.Tensor) else agent.position)
 
         for food in self.world.get_food():
-            foods.append(food.position - self.container_size / 2)
+            foods.append(food.position.cpu().numpy() if isinstance(food.position, torch.Tensor) else food.position)
 
         if predators:
-            self.predator_markers.set_data(np.array(predators), face_color='red', size=15)
+            self.predator_markers.set_data(np.array(predators) - self.container_size / 2, face_color='red', size=15)
         else:
             self.predator_markers.set_data(np.empty((0, 3)))
 
         if prey:
-            self.prey_markers.set_data(np.array(prey), face_color='blue', size=10)
+            self.prey_markers.set_data(np.array(prey) - self.container_size / 2, face_color='blue', size=10)
         else:
             self.prey_markers.set_data(np.empty((0, 3)))
 
         if foods:
-            self.food_markers.set_data(np.array(foods), face_color='green', size=5)
+            self.food_markers.set_data(np.array(foods) - self.container_size / 2, face_color='green', size=5)
         else:
             self.food_markers.set_data(np.empty((0, 3)))
 
