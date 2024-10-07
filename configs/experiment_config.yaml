@@ -1,0 +1,19 @@
+# configs/experiment_config.yaml
+
+simulation:
+  num_agents:
+    predators: 15
+    prey: 30
+  max_steps: 2000
+
+agent:
+  energy:
+    initial: 120.0
+    metabolism_rate: 0.08
+
+dna:
+  mutation_rate: 0.02
+
+model:
+  learning_rate: 0.0001
+  gamma: 0.95

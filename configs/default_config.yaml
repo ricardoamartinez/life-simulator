@@ -1,0 +1,44 @@
+# configs/default_config.yaml
+
+simulation:
+  num_agents:
+    predators: 10
+    prey: 20
+  max_steps: 1000
+  container_size: [100, 100, 100]  # Width, Height, Depth
+  time_step: 0.1
+  food_spawn_rate: 5  # Number of food items to spawn each step
+
+agent:
+  vision_range: 10.0
+  vision_angle: 120  # Degrees
+  max_speed: 5.0
+  energy:
+    initial: 100.0
+    metabolism_rate: 0.1
+    movement_cost_factor: 0.05
+    consumption_gain: 50.0
+
+dna:
+  mutation_rate: 0.01
+  traits:
+    speed: [1.0, 5.0]
+    size: [0.5, 2.0]
+    vision_range: [5.0, 15.0]
+
+model:
+  algorithm: PPO
+  learning_rate: 0.0003
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_epsilon: 0.2
+  update_epochs: 4
+  mini_batch_size: 64
+
+visualization:
+  enable: True
+  debug_mode: False
+  display_rate: 30  # Frames per second
+
+hardware:
+  use_cuda: True
